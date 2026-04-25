@@ -24,6 +24,14 @@ app.use('/api/appointments', appointmentRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/records', recordRoutes);
 
+const path = require("path");
+
+app.use(express.static(path.join(__dirname, "../client/build")));
+
+app.use((req, res) => {
+  res.sendFile(path.join(__dirname, "../client/build/index.html"));
+});
+
 app.get('/', (req, res) => {
   res.send('AI Healthcare System Backend');
 });
@@ -44,11 +52,3 @@ async function startServer() {
   }
 }
 
-startServer();
-const path = require("path");
-
-app.use(express.static(path.join(__dirname, "../client/build")));
-
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "../client/build/index.html"));
-});
