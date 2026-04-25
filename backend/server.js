@@ -1,6 +1,8 @@
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 require('dotenv').config();
+
 const { connectDB } = require('./config/db');
 const { router: otpRoutes } = require('./routes/otp');
 const { ensureSampleDoctors } = require('./utils/sampleDoctors');
@@ -14,41 +16,49 @@ const recordRoutes = require('./routes/records');
 
 const app = express();
 
+// Middleware
 app.use(cors());
 app.use(express.json());
-app.use('/api/otp', otpRoutes);
 
+// API Routes
+app.use('/api/otp', otpRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/doctors', doctorRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/records', recordRoutes);
 
-const path = require("path");
+// Serve React frontend
+app.use(express.static(path.join(__dirname, '../client/build')));
 
-app.use(express.static(path.join(__dirname, "../client/build")));
-
-app.use((req, res) => {
-  res.sendFile(path.join(__dirname, "../client/build/index.html"));
+// Root test route (optional)
+app.get('/api', (req, res) => {
+  res.send('AI Healthcare System Backend Running');
 });
 
-app.get('/', (req, res) => {
-  res.send('AI Healthcare System Backend');
+// React catch-all route (IMPORTANT)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../client/build/index.html'));
 });
 
+// Port
 const PORT = process.env.PORT || 5000;
 
+// Start server
 async function startServer() {
   try {
     await connectDB();
     await ensureAdminUser();
     await ensureSampleDoctors();
+
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
     });
+
   } catch (err) {
-    console.error('MongoDB connection error:', err.message);
+    console.error('Server startup error:', err.message);
     process.exit(1);
   }
 }
 
+startServer();
