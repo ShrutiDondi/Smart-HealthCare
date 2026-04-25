@@ -4,23 +4,24 @@ const path = require('path');
 require('dotenv').config();
 
 const { connectDB } = require('./config/db');
-const { router: otpRoutes } = require('./routes/otp');
-const { ensureSampleDoctors } = require('./utils/sampleDoctors');
-const { ensureAdminUser } = require('./utils/seedAdmin');
 
+const { router: otpRoutes } = require('./routes/otp');
 const authRoutes = require('./routes/auth');
 const doctorRoutes = require('./routes/doctors');
 const appointmentRoutes = require('./routes/appointments');
 const userRoutes = require('./routes/users');
 const recordRoutes = require('./routes/records');
 
+const { ensureAdminUser } = require('./utils/seedAdmin');
+const { ensureSampleDoctors } = require('./utils/sampleDoctors');
+
 const app = express();
 
-// ================= MIDDLEWARE =================
+// middleware
 app.use(cors());
 app.use(express.json());
 
-// ================= API ROUTES =================
+// api routes
 app.use('/api/otp', otpRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/doctors', doctorRoutes);
@@ -28,22 +29,24 @@ app.use('/api/appointments', appointmentRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/records', recordRoutes);
 
-// ================= HEALTH CHECK =================
+// health check
 app.get('/api', (req, res) => {
   res.send('AI Healthcare System Backend Running');
 });
 
-// ================= FRONTEND BUILD =================
+// frontend
 const buildPath = path.join(__dirname, '../client/build');
-
 app.use(express.static(buildPath));
 
-// IMPORTANT: SAFE fallback (NO '*', NO '/*')
+// ❌ NO app.get('*')
+// ❌ NO app.get('/*')
+
+// safe fallback WITHOUT wildcard routes
 app.use((req, res) => {
   res.sendFile(path.join(buildPath, 'index.html'));
 });
 
-// ================= START SERVER =================
+// server start
 const PORT = process.env.PORT || 5000;
 
 async function startServer() {
@@ -57,7 +60,7 @@ async function startServer() {
     });
 
   } catch (err) {
-    console.error('Server startup error:', err.message);
+    console.error(err);
     process.exit(1);
   }
 }
