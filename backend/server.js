@@ -16,11 +16,11 @@ const recordRoutes = require('./routes/records');
 
 const app = express();
 
-// ===================== MIDDLEWARE =====================
+// ================= MIDDLEWARE =================
 app.use(cors());
 app.use(express.json());
 
-// ===================== API ROUTES =====================
+// ================= API ROUTES =================
 app.use('/api/otp', otpRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/doctors', doctorRoutes);
@@ -28,20 +28,22 @@ app.use('/api/appointments', appointmentRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/records', recordRoutes);
 
-// ===================== ROOT TEST ROUTE =====================
+// ================= HEALTH CHECK =================
 app.get('/api', (req, res) => {
   res.send('AI Healthcare System Backend Running');
 });
 
-// ===================== SERVE FRONTEND =====================
-app.use(express.static(path.join(__dirname, '../client/build')));
+// ================= FRONTEND BUILD =================
+const buildPath = path.join(__dirname, '../client/build');
 
-// IMPORTANT: React catch-all route (SAFE VERSION)
-app.get('/*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../client/build/index.html'));
+app.use(express.static(buildPath));
+
+// IMPORTANT: SAFE fallback (NO '*', NO '/*')
+app.use((req, res) => {
+  res.sendFile(path.join(buildPath, 'index.html'));
 });
 
-// ===================== SERVER START =====================
+// ================= START SERVER =================
 const PORT = process.env.PORT || 5000;
 
 async function startServer() {
